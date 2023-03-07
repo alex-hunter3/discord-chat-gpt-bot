@@ -4,6 +4,14 @@ import openai
 
 
 class Bot(discord.Client):
+    def __init__(self, *args, **kwargs):
+        credentials = self.get_credentials()
+
+        self.OPEN_AI_KEY = credentials["OPENAI_SECRET_KEY"]
+        self.DISCORD_SECRET_TOKEN = credentials["DISCORD_SECRET_TOKEN"]
+
+        super().__init__(*args, **kwargs)
+
     async def on_ready(self) -> None:
         print("Logged in as {0.user}".format(client))
 
@@ -74,9 +82,9 @@ class Bot(discord.Client):
             return json.load(f)
 
     def run(self):
-        openai.api_key = self.get_credentials()["OPENAI_SECRET_KEY"]
+        openai.api_key = self.OPEN_AI_KEY
 
-        super().run(self.get_credentials()["DISCORD_SECRET_TOKEN"])
+        super().run(self.DISCORD_SECRET_TOKEN)
 
 
 if __name__ == "__main__":
