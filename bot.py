@@ -52,8 +52,16 @@ class ChatManager:
     def remove_expired_chats(self) -> None:
         for chat in self.chats:
             if self.is_timed_out(chat):
-                self.chats.remove(chat)
+                self.remove_chat(chat)
                 return None # stop because we found the chat to remove
+
+    def remove_chat(self, chat: dict) -> None:
+        try:
+            self.chats.remove(chat)
+        except ValueError:
+            pass
+        except Exception as e:
+            print(e)
 
     def is_timed_out(self, chat: dict) -> bool:
         return time.time() > chat["expires"]
@@ -113,7 +121,12 @@ class Bot(discord.Client):
             return "Sure, I can help you. Here are the commands I can do: \n\n" \
                 "`!ping` - I'll respond with `pong`\n" \
                 "`!help` - I'll respond with this message\n" \
+                "`!clear` - I'll clear all prompts from this channel\n" \
                 "`!gpt <prompt>` - I'll respond with a GPT-3 response to the prompt"
+
+        elif msg == "!clear":
+            self.chat_manager.remove_chat(self.chat_manager.find_chat(message))
+            return "All prompts cleared from this channel."
 
         elif msg.startswith("!gpt"):
             prompt = self.get_prompt(msg)
