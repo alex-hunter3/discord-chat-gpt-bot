@@ -34,7 +34,7 @@ class Bot(discord.Client):
             prompt = self.get_prompt(msg)
 
             if prompt is None:
-                return "`Invalid prompt: to give a prompt, type `!gpt <prompt>`"
+                return "Invalid prompt: to give a prompt, type `!gpt <prompt>`"
 
             # return prompt
             return self.get_chat_gpt_response(prompt)
