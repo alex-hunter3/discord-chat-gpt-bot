@@ -1,6 +1,8 @@
+import asyncio
 import discord
 import json
 import openai
+import threading
 
 
 class Bot(discord.Client):
@@ -10,6 +12,10 @@ class Bot(discord.Client):
         self.OPEN_AI_KEY = credentials["OPENAI_SECRET_KEY"]
         self.DISCORD_SECRET_TOKEN = credentials["DISCORD_SECRET_TOKEN"]
 
+        # event loop so that we can get multiple responses from the GPT-3 API at the same time
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+
         super().__init__(*args, **kwargs)
 
     async def on_ready(self) -> None:
@@ -18,16 +24,23 @@ class Bot(discord.Client):
         # set the activity
         await self.change_presence(activity=discord.Game(name="Answering queries..."))
 
-    async def on_message(self, message) -> None:
+    async def on_message(self, message: discord.message.Message) -> None:
         if message.author == client.user:
             return None # don't respond to self, avoids an infinite loop
 
         print(f"[{message.author}]: {message.content}")
 
+        thread = threading.Thread(target=self.handle_message, args=(message,))
+        thread.start()
+
+    async def send_message(self, message: discord.message.Message, response: str):
+        await message.channel.send(response)
+
+    def handle_message(self, message: discord.message.Message):
         response = self.get_response(message.content)
 
         if response is not None:
-            await message.channel.send(response)
+            self.loop.create_task(self.send_message(message, response))
 
     def get_response(self, msg: str) -> str:
         msg = msg.lower()
