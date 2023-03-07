@@ -7,6 +7,9 @@ class Bot(discord.Client):
     async def on_ready(self) -> None:
         print("Logged in as {0.user}".format(client))
 
+        # set the activity
+        await self.change_presence(activity=discord.Game(name="Answering queries..."))
+
     async def on_message(self, message) -> None:
         if message.author == client.user:
             return None # don't respond to self, avoids an infinite loop
