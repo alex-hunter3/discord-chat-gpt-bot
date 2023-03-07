@@ -43,15 +43,19 @@ class Bot(discord.Client):
             return None
 
     def get_chat_gpt_response(self, prompt: str) -> str:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "user", "content": prompt},
-            ]
-        )
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "user", "content": prompt},
+                ]
+            )
 
-        # return the response from chatgpt
-        return response["choices"][0]["message"]["content"]
+            # return the response from chatgpt
+            return response["choices"][0]["message"]["content"]
+        except Exception as e:
+            print(e)
+            return "Something went wrong. Please try again later."
 
     def get_prompt(self, msg: str) -> str:
         prompt = msg.split(" ")
