@@ -11,10 +11,6 @@ class ChatManager:
         remove_expired_chats_thread = threading.Thread(target=self.remove_expired_chats)
         remove_expired_chats_thread.start()
 
-    def has_root(self):
-        # checks if the root chat has been created yet
-        return hasattr(self, "root")
-
     def get_chat_response(self, msg: discord.message.Message, prompt: str) -> str:
         chat = self.find_chat(msg)
 
@@ -48,7 +44,7 @@ class ChatManager:
 
             time.sleep(10)
 
-    def remove_chat(self, chat: dict) -> None:
+    def remove_chat(self, chat: chats.chat.Chat) -> None:
         try:
             self.chats.remove(chat)
         except ValueError:
