@@ -29,7 +29,7 @@ class ChatManager:
 
         return new_chat
 
-    def find_chat(self, msg: discord.message.Message) -> chats.chat.Chat | None:
+    def find_chat(self, msg: discord.message.Message) -> chats.chat.Chat:
         for chat in self.chats:
             if chat.server == msg.guild.id and chat.channel == msg.channel.id:
                 return chat
