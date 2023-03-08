@@ -1,15 +1,16 @@
 import time
 import openai
+import discord
 
 
 class Chat:
-    def __init__(self, server, channel, timeout=86400):
+    def __init__(self, server: int, channel: int, timeout: int = 86400) -> None:
         self.server = server
         self.channel = channel
         self.__prompts = []
         self.__expires = time.time() + timeout
 
-    def get_gpt_response(self, prompt):
+    def get_gpt_response(self, prompt: str) -> str:
         self.__add_prompt(prompt)
 
         try:
@@ -26,10 +27,10 @@ class Chat:
             print(e)
             return "Something went wrong. Please try again later."
         
-    def __add_prompt(self, prompt):
+    def __add_prompt(self, prompt: str) -> None:
         self.__prompts.append(prompt)
 
     @property
-    def expired(self):
+    def expired(self) -> bool:
         return time.time() > self.__expires
-        
+

@@ -5,7 +5,7 @@ import chats.chat
 
 
 class ChatManager:
-    def __init__(self):
+    def __init__(self) -> None:
         self.chats = []
 
         remove_expired_chats_thread = threading.Thread(target=self.remove_expired_chats)

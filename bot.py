@@ -7,7 +7,7 @@ import chats.manager
 
 
 class Bot(discord.Client):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         credentials = self.get_credentials()
 
         self.OPEN_AI_KEY = credentials["OPENAI_SECRET_KEY"]
@@ -40,13 +40,13 @@ class Bot(discord.Client):
     async def send_message(self, message: discord.message.Message, response: str):
         await message.channel.send(response)
 
-    def handle_message(self, message: discord.message.Message):
+    def handle_message(self, message: discord.message.Message) -> None:
         response = self.get_response(message)
 
         if response is not None:
             self.loop.create_task(self.send_message(message, response))
 
-    def get_response(self, message) -> str:
+    def get_response(self, message: str) -> str:
         msg = message.content.lower()
 
         if msg == "!ping":
