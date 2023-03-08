@@ -1,74 +1,9 @@
 import asyncio
 import discord
-import json
 import openai
+import json
 import threading
-import time
-
-
-class ChatManager:
-    def __init__(self):
-        self.chats = []
-
-    def get_chat_response(self, msg: discord.message.Message, prompt: str) -> str:
-        chat = self.find_chat(msg)
-
-        if chat is None:
-            self.add_chat(msg)
-            chat = self.find_chat(msg)
-
-        chat["prompts"].append(prompt)
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "user", "content": "\n".join(chat["prompts"])},
-                ]
-            )
-
-            # return the response from chatgpt
-            return response["choices"][0]["message"]["content"]
-        except Exception as e:
-            print(e)
-            return "Something went wrong. Please try again later."
-
-    def add_chat(self, chat: discord.message.Message) -> None:
-        return self.chats.append({
-            "expires": self.timeout,
-            "server": chat.guild.id,
-            "channel": chat.channel.id,
-            "prompts": []
-        })
-
-    def find_chat(self, msg: discord.message.Message) -> dict:
-        self.remove_expired_chats()
-
-        for chat in self.chats:
-            if chat["server"] == msg.guild.id and chat["channel"] == msg.channel.id:
-                return chat
-
-        return None
-
-    def remove_expired_chats(self) -> None:
-        for chat in self.chats:
-            if self.is_timed_out(chat):
-                self.remove_chat(chat)
-                return None # stop because we found the chat to remove
-
-    def remove_chat(self, chat: dict) -> None:
-        try:
-            self.chats.remove(chat)
-        except ValueError:
-            pass
-        except Exception as e:
-            print(e)
-
-    def is_timed_out(self, chat: dict) -> bool:
-        return time.time() > chat["expires"]
-
-    @property
-    def timeout(self) -> int:
-        return time.time() + 86400
+import chats.manager
 
 
 class Bot(discord.Client):
@@ -83,18 +18,18 @@ class Bot(discord.Client):
         asyncio.set_event_loop(self.loop)
 
         # set up the ChatManager to handle chat responses
-        self.chat_manager = ChatManager()
+        self.chat_manager = chats.manager.ChatManager()
 
         super().__init__(*args, **kwargs)
 
     async def on_ready(self) -> None:
-        print("Logged in as {0.user}".format(client))
+        print("Logged in as {0.user}".format(self))
 
         # set the activity
         await self.change_presence(activity=discord.Game(name="Answering queries..."))
 
     async def on_message(self, message: discord.message.Message) -> None:
-        if message.author == client.user:
+        if message.author == self.user:
             return None # don't respond to self, avoids an infinite loop
 
         print(f"[{message.author}]: {message.content}")
@@ -172,5 +107,5 @@ if __name__ == "__main__":
     intents.typing = False
     intents.presences = False
 
-    client = Bot(intents=intents, command_prefix="!")
-    client.run()
+    bot = Bot(intents=intents, command_prefix="!")
+    bot.run()
