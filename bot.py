@@ -57,11 +57,16 @@ class Bot(discord.Client):
                 "`!ping` - I'll respond with `pong`\n" \
                 "`!help` - I'll respond with this message\n" \
                 "`!clear` - I'll clear all prompts from this channel\n" \
+                "`!purge` - I'll clear all messages from this channel\n" \
                 "`!gpt <prompt>` - I'll respond with a GPT-3 response to the prompt"
 
         elif msg == "!clear":
             self.chat_manager.remove_chat(self.chat_manager.find_chat(message))
             return "All prompts cleared from this channel."
+
+        elif msg == "!purge":
+            self.loop.create_task(self.purge_channel(message))
+            return None # don't send a message because self.purge_channel() will send one (weird architecture I am aware, but it works)
 
         elif msg.startswith("!gpt"):
             prompt = self.get_prompt(msg)
@@ -75,6 +80,12 @@ class Bot(discord.Client):
         else:
             return None
 
+    async def purge_channel(self, msg: discord.message.Message):
+        async for message in msg.channel.history():
+            await message.delete()
+
+        await self.send_message(msg, "What academic malpractice?")
+
     def get_chat_gpt_response(self, message, prompt: str) -> str:
         try:
             return self.chat_manager.get_chat_response(message, prompt)
@@ -83,7 +94,7 @@ class Bot(discord.Client):
             return "Something went wrong. Please try again later."
 
     def get_prompt(self, msg: str) -> str:
-        prompt = msg.split(" ")
+        prompt = msg.strip().split(" ")
 
         if len(prompt) == 1:
             return None

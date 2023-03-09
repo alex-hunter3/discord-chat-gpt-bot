@@ -1,10 +1,13 @@
 import time
 import openai
-import discord
+
+
+# one day in seconds
+DAY = 60 * 60 * 24
 
 
 class Chat:
-    def __init__(self, server: int, channel: int, timeout: int = 86400) -> None:
+    def __init__(self, server: int, channel: int, timeout: int = DAY) -> None:
         self.server = server
         self.channel = channel
         self.__prompts = []
